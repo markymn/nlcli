@@ -18,6 +18,7 @@
 nlcli
 .nlcli/
 config.json
+dist/
 
 # IDEs
 .idea/

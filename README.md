@@ -12,7 +12,7 @@
 
 ## Quick Start
 
-Install and add `nlcli` to your PATH instantly by running one of these commands:
+Install and add `nlcli` to your PATH instantly by running one of these commands. **No prerequisites (Go/Git) required!**
 
 ### Windows (PowerShell)
 ```powershell

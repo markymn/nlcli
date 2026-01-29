@@ -1,54 +1,37 @@
-
 # nlcli Remote Installer for Windows
 
 Write-Host "Installing nlcli..." -ForegroundColor Cyan
 
-# 1. Check Prerequisites
-if (-not (Get-Command "git" -ErrorAction SilentlyContinue)) {
-    Write-Host "Error: 'git' is not installed. Please install Git and try again." -ForegroundColor Red
-    exit 1
-}
-if (-not (Get-Command "go" -ErrorAction SilentlyContinue)) {
-    Write-Host "Error: 'go' is not installed. Please install Go (golang.org) and try again." -ForegroundColor Red
-    exit 1
-}
+# 1. Detect Architecture
+$arch = "amd64"
+if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { $arch = "arm64" }
+
+$binaryName = "nlcli-windows-$arch.exe"
+$downloadUrl = "https://github.com/markymn/nlcli/releases/latest/download/$binaryName"
 
 # 2. Setup Directories
 $installDir = [System.IO.Path]::Combine($env:USERPROFILE, ".nlcli")
-$srcDir = Join-Path $installDir "src"
 $binDir = Join-Path $installDir "bin"
 
 if (-not (Test-Path $binDir)) {
     New-Item -ItemType Directory -Force -Path $binDir | Out-Null
 }
 
-# 3. Clone Repository
-if (Test-Path $srcDir) {
-    Remove-Item -Recurse -Force $srcDir
-}
-Write-Host "Cloning repository..." -ForegroundColor Cyan
-git clone --depth 1 https://github.com/markymn/nlcli.git $srcDir | Out-Null
+# 3. Download Binary
+Write-Host "Downloading $binaryName..." -ForegroundColor Cyan
+$targetFile = Join-Path $binDir "nlcli.exe"
 
-if (-not (Test-Path $srcDir)) {
-    Write-Host "Error: Failed to clone repository." -ForegroundColor Red
+try {
+    Invoke-WebRequest -Uri $downloadUrl -OutFile $targetFile -ErrorAction Stop
+}
+catch {
+    Write-Host "Error: Failed to download binary from GitHub. Please check your connection or ensures a release exists." -ForegroundColor Red
     exit 1
 }
 
-# 4. Build
-Write-Host "Building nlcli..." -ForegroundColor Cyan
-Set-Location $srcDir
-go build -o nlcli.exe ./cmd/nlcli
+Write-Host "Installed to $targetFile" -ForegroundColor Green
 
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Build failed." -ForegroundColor Red
-    exit 1
-}
-
-# 5. Install Binary
-Move-Item -Force "nlcli.exe" "$binDir\nlcli.exe"
-Write-Host "Installed to $binDir\nlcli.exe" -ForegroundColor Green
-
-# 6. Update PATH
+# 4. Update PATH
 $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
 $pathParts = $currentPath -split ';'
 
@@ -60,7 +43,3 @@ if ($pathParts -notcontains $binDir) {
 else {
     Write-Host "Success: 'nlcli' is ready to use!" -ForegroundColor Green
 }
-
-# Cleanup source
-Set-Location $env:USERPROFILE
-Remove-Item -Recurse -Force $srcDir

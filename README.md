@@ -53,6 +53,13 @@ To keep your terminal safe, `nlcli` features a 4-stage permission system:
 
 Switch levels anytime using the `.safety` command.
 
+## Supported Providers
+
+- OpenAI
+- Anthropic
+- Google Gemini
+- Groq
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -86,7 +86,7 @@ func (r *REPL) Start() {
 
 func (r *REPL) printPrompt() {
 	cwd, _ := os.Getwd()
-	fmt.Printf("%s%s%s > ", colorPurple, cwd, colorReset)
+	fmt.Printf("%s%s>%s", colorPurple, cwd, colorReset)
 }
 
 func (r *REPL) setupSignals() {
@@ -184,7 +184,7 @@ func (r *REPL) changeAPI() {
 	}
 
 	r.client = provider.NewMultiClient(key, model, providerName, nil)
-	fmt.Printf("%sSwitched to %s (%s)%s\n", colorPurple, r.client.PrimaryName(), r.client.PrimaryModel(), colorReset)
+	fmt.Printf("Switched to %s (%s)\n", r.client.PrimaryName(), r.client.PrimaryModel())
 }
 
 func (r *REPL) changeModel() {
@@ -215,7 +215,7 @@ func (r *REPL) changeModel() {
 	}
 
 	r.client = provider.NewMultiClient(key, model, providerName, nil)
-	fmt.Printf("%sSwitched to %s (%s)%s\n", colorPurple, r.client.PrimaryName(), r.client.PrimaryModel(), colorReset)
+	fmt.Printf("Switched to %s (%s)\n", r.client.PrimaryName(), r.client.PrimaryModel())
 }
 
 func (r *REPL) uninstall() {
@@ -260,6 +260,12 @@ func (r *REPL) translateAndRun(input string) {
 	cmd, err := r.client.GetCommand(input, cwd, r.shellType, r.history)
 	if err != nil {
 		fmt.Printf("%sError: %s%s\n", colorRed, err, colorReset)
+		return
+	}
+
+	cmd = strings.TrimSpace(cmd)
+	if cmd == "" {
+		fmt.Printf("%sError: Could not translate to a command.%s\n", colorRed, colorReset)
 		return
 	}
 

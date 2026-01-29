@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"fmt"
+	"runtime"
 	"strings"
 
 	"github.com/markymn/nlcli/internal/history"
@@ -11,6 +13,28 @@ type Provider interface {
 	Name() string
 	Model() string
 	GetCommand(userInput, cwd string, shellType shell.ShellType, hist *history.History) (string, error)
+}
+
+func BuildSystemPrompt(userInput, cwd string, shellType shell.ShellType, hist *history.History) string {
+	return fmt.Sprintf(`You are a command line expert and translation assistant.
+Target Shell: %s
+OS: %s
+Current Directory: %s
+
+Previous commands for context:
+%s
+
+User Request: %s
+
+Instructions:
+1. Output ONLY the raw shell command to execute. 
+2. Do NOT use markdown formatting (no backticks).
+3. Do NOT provide explanations or warnings.
+4. If a file size is specified (e.g., "10mb"), translate it to the appropriate shell constraint (e.g., in PowerShell use '-lt 10MB').
+5. Do NOT recurse through subdirectories (e.g., no '-Recurse' in PowerShell or '-R' in ls) unless the user explicitly asks for it (e.g., uses words like "recursively", "everywhere", "globally", "in all subfolders"). "All files" means all files in the CURRENT directory only.
+6. If the request is ambiguous, provide the most likely intended command.
+7. If you cannot find a valid command, output an empty string.`,
+		shell.GetShellName(shellType), runtime.GOOS, cwd, hist.Format(), userInput)
 }
 
 func DetectProvider(apiKey string) (primary string, fallbacks []string) {

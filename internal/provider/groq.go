@@ -61,18 +61,7 @@ type groqResponse struct {
 }
 
 func (g *Groq) GetCommand(userInput, cwd string, shellType shell.ShellType, hist *history.History) (string, error) {
-	prompt := fmt.Sprintf(`You are a command line assistant.
-Target Shell: %s
-OS: Windows
-Current Directory: %s
-
-Previous commands:
-%s
-
-User Request: %s
-
-Output only the shell command to execute. No markdown, no explanations.`,
-		shell.GetShellName(shellType), cwd, hist.Format(), userInput)
+	prompt := BuildSystemPrompt(userInput, cwd, shellType, hist)
 
 	reqBody := groqRequest{
 		Model:     g.model,

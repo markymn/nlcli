@@ -110,12 +110,9 @@ func FetchOpenAIModels(apiKey string) ([]string, error) {
 		return nil, err
 	}
 
-	// Filter to only chat models (gpt-*)
 	var models []string
 	for _, m := range result.Data {
-		if strings.HasPrefix(m.ID, "gpt-") && !strings.Contains(m.ID, "instruct") {
-			models = append(models, m.ID)
-		}
+		models = append(models, m.ID)
 	}
 	sort.Strings(models)
 	return models, nil

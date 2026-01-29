@@ -158,10 +158,10 @@ func (r *REPL) changeAPI() {
 
 		fmt.Printf("%sInvalid API key format.%s\n", colorRed, colorReset)
 		fmt.Println("Supported providers:")
-		fmt.Println("  OpenAI (sk-...)")
-		fmt.Println("  Anthropic (sk-ant-...)")
-		fmt.Println("  Google (AIza...)")
-		fmt.Println("  Groq (gsk_...)")
+		fmt.Println("  OpenAI")
+		fmt.Println("  Anthropic")
+		fmt.Println("  Google")
+		fmt.Println("  Groq")
 		fmt.Println()
 	}
 

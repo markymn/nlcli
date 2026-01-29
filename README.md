@@ -40,10 +40,10 @@ Inside the session:
 
 ## Supported Providers
 
-- **OpenAI**: Requires `sk-...`
-- **Anthropic**: Requires `sk-ant-...`
-- **Google Gemini**: Requires `AIza...`
-- **Groq**: Requires `gsk_...`
+- **OpenAI**
+- **Anthropic**
+- **Google Gemini**
+- **Groq**
 
 ## License
 

@@ -134,12 +134,9 @@ func FetchGroqModels(apiKey string) ([]string, error) {
 		return nil, err
 	}
 
-	// Filter to only text/chat models (exclude whisper, etc.)
 	var models []string
 	for _, m := range result.Data {
-		if !strings.Contains(m.ID, "whisper") && !strings.Contains(m.ID, "tool-use") {
-			models = append(models, m.ID)
-		}
+		models = append(models, m.ID)
 	}
 	sort.Strings(models)
 	return models, nil

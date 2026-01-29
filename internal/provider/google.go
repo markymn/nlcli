@@ -112,14 +112,11 @@ func FetchGoogleModels(apiKey string) ([]string, error) {
 		return nil, err
 	}
 
-	// Filter to only generateContent capable models
 	var models []string
 	for _, m := range result.Models {
-		// Names come as "models/gemini-2.5-flash", extract just the model name
+		// Names come as "models/gemini-1.5-flash", extract just the model name
 		name := strings.TrimPrefix(m.Name, "models/")
-		if strings.HasPrefix(name, "gemini-") {
-			models = append(models, name)
-		}
+		models = append(models, name)
 	}
 	return models, nil
 }

@@ -86,7 +86,6 @@ Output only the shell command to execute. No markdown, no explanations.`,
 	return strings.TrimSpace(result.Content[0].Text), nil
 }
 
-// FetchAnthropicModels retrieves available models from the Anthropic API
 func FetchAnthropicModels(apiKey string) ([]string, error) {
 	req, _ := http.NewRequest("GET", "https://api.anthropic.com/v1/models", nil)
 	req.Header.Set("x-api-key", apiKey)

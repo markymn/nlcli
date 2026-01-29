@@ -88,7 +88,6 @@ Output only the shell command to execute. No markdown, no explanations.`,
 	return strings.TrimSpace(result.Choices[0].Message.Content), nil
 }
 
-// FetchOpenAIModels retrieves available models from the OpenAI API
 func FetchOpenAIModels(apiKey string) ([]string, error) {
 	req, _ := http.NewRequest("GET", "https://api.openai.com/v1/models", nil)
 	req.Header.Set("Authorization", "Bearer "+apiKey)

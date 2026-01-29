@@ -17,7 +17,7 @@ import (
 
 const (
 	colorReset  = "\033[0m"
-	colorPurple = "\033[35m" // Purple
+	colorPurple = "\033[35m"
 	colorYellow = "\033[33m"
 	colorCyan   = "\033[36m"
 	colorRed    = "\033[31m"
@@ -206,7 +206,7 @@ func (r *REPL) changeModel() {
 
 	model, err := config.SelectModel(models, displayName)
 	if err != nil {
-		return // cancelled or error
+		return
 	}
 
 	if err := config.SaveConfig(key, model); err != nil {
@@ -242,8 +242,6 @@ func (r *REPL) runCommand(cmd string) {
 		if err := shell.ExecuteCD(path); err != nil {
 			fmt.Printf("%s%s%s\n", colorRed, err, colorReset)
 		}
-		// Don't add simple navigation to history context to avoid noise, or maybe do?
-		// For now let's add it so AI knows where we are if it looks at history.
 		r.history.Add(cmd, "")
 		return
 	}

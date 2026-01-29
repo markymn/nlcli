@@ -91,7 +91,6 @@ Output only the shell command to execute. No markdown, no explanations.`,
 	return strings.TrimSpace(result.Candidates[0].Content.Parts[0].Text), nil
 }
 
-// FetchGoogleModels retrieves available models from the Google Gemini API
 func FetchGoogleModels(apiKey string) ([]string, error) {
 	req, _ := http.NewRequest("GET", "https://generativelanguage.googleapis.com/v1beta/models?key="+apiKey, nil)
 
@@ -114,7 +113,6 @@ func FetchGoogleModels(apiKey string) ([]string, error) {
 
 	var models []string
 	for _, m := range result.Models {
-		// Names come as "models/gemini-1.5-flash", extract just the model name
 		name := strings.TrimPrefix(m.Name, "models/")
 		models = append(models, name)
 	}

@@ -61,7 +61,6 @@ type groqResponse struct {
 }
 
 func (g *Groq) GetCommand(userInput, cwd string, shellType shell.ShellType, hist *history.History) (string, error) {
-	// Using fmt.Sprintf logic which works well with hist.Format()
 	prompt := fmt.Sprintf(`You are a command line assistant.
 Target Shell: %s
 OS: Windows
@@ -112,7 +111,6 @@ Output only the shell command to execute. No markdown, no explanations.`,
 	return strings.TrimSpace(result.Choices[0].Message.Content), nil
 }
 
-// FetchGroqModels retrieves available models from the Groq API
 func FetchGroqModels(apiKey string) ([]string, error) {
 	req, _ := http.NewRequest("GET", "https://api.groq.com/openai/v1/models", nil)
 	req.Header.Set("Authorization", "Bearer "+apiKey)

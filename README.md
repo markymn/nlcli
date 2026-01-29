@@ -1,4 +1,4 @@
-# nlcli 🚀
+# nlcli
 
 **nlcli** is a natural language interface for your terminal. It translates natural language requests into shell commands using powerful AI models from OpenAI, Anthropic, Google Gemini, and Groq.
 

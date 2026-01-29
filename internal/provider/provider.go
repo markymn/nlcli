@@ -26,27 +26,22 @@ func DetectProvider(apiKey string) (primary string, fallbacks []string) {
 	case strings.HasPrefix(apiKey, "gsk_"):
 		return "groq", nil
 	default:
-		// Attempt to verify against all providers
 		if provider := VerifyKey(apiKey); provider != "" {
 			return provider, nil
 		}
-		return "", nil // Unknown key format and failed verification
+		return "", nil
 	}
 }
 
-// VerifyKey tries to use the key with each provider to see if it works
 func VerifyKey(apiKey string) string {
 	providers := []string{"openai", "anthropic", "google", "groq"}
 	for _, p := range providers {
-		// We use FetchModels as a lightweight auth check
 		if _, err := FetchModels(p, apiKey); err == nil {
 			return p
 		}
 	}
 	return ""
 }
-
-// FetchModels dispatches to the correct provider's fetch function
 func FetchModels(providerName, apiKey string) ([]string, error) {
 	switch providerName {
 	case "openai":

@@ -22,7 +22,6 @@ func SelectModel(models []string, providerName string) (string, error) {
 
 	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 	if err != nil {
-		// Fallback to simple selection if raw mode fails
 		return models[0], nil
 	}
 	defer term.Restore(int(os.Stdin.Fd()), oldState)
@@ -44,7 +43,7 @@ func SelectModel(models []string, providerName string) (string, error) {
 			case keyEnter, keyLF:
 				clearOptions(len(models) + 1)
 				return models[selected], nil
-			case 'q', 3: // q or Ctrl+C
+			case 'q', 3:
 				clearOptions(len(models) + 1)
 				return models[0], nil
 			}

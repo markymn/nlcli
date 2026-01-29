@@ -10,7 +10,7 @@
 - **Context-Aware**: Remembers previous commands to provide better translations.
 - **Cross-Platform**: Designed for Windows (Powershell/Cmd) and Unix-like systems (Bash/Zsh/Fish).
 
-## 🚀 Quick Start (Zero-Cloning Required!)
+## Quick Start
 
 Install and add `nlcli` to your PATH instantly by running one of these commands:
 
@@ -36,13 +36,13 @@ Inside the session:
 - Run commands directly: `ls -la` (Automatically validated)
 - Special commands:
     - `.help`: Show help menu
-    - `.safety`: **New!** Rotate through 4 safety levels
+    - `.safety`: Rotate through 4 safety levels
     - `.api`: Change API key and provider
     - `.model`: Change the AI model
     - `.uninstall`: Completely remove nlcli and clean up PATH
     - `.exit`: Quit the terminal
 
-## 🛡️ Safety System
+## Safety System
 
 To keep your terminal safe, `nlcli` features a 4-stage permission system:
 

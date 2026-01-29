@@ -30,15 +30,18 @@ type REPL struct {
 	shellType shell.ShellType
 	history   *history.History
 	reader    *bufio.Reader
+	safety    shell.SafetyLevel
 }
 
 func New(client *provider.MultiClient, executor *shell.Executor, shellType shell.ShellType) *REPL {
+	os.Setenv("NLCLI_INSIDE", "1")
 	return &REPL{
 		client:    client,
 		executor:  executor,
 		shellType: shellType,
 		history:   history.New(),
 		reader:    bufio.NewReader(os.Stdin),
+		safety:    shell.SafetyLevel(config.LoadSafetyLevel()),
 	}
 }
 
@@ -116,6 +119,9 @@ func (r *REPL) handleSpecial(input string) bool {
 	case ".uninstall":
 		r.uninstall()
 		return true
+	case ".safety":
+		r.changeSafety()
+		return true
 	}
 	return false
 }
@@ -124,7 +130,8 @@ func (r *REPL) showHelp() {
 	fmt.Printf("\n%s%snlcli - Natural Language CLI%s\n\n", colorBold, colorCyan, colorReset)
 	fmt.Printf("Shell:    %s%s%s\n", colorYellow, shell.GetShellName(r.shellType), colorReset)
 	fmt.Printf("Provider: %s%s%s\n", colorYellow, r.client.PrimaryName(), colorReset)
-	fmt.Printf("Model:    %s%s%s\n\n", colorYellow, r.client.PrimaryModel(), colorReset)
+	fmt.Printf("Model:    %s%s%s\n", colorYellow, r.client.PrimaryModel(), colorReset)
+	fmt.Printf("Safety:   %s%s%s\n\n", colorYellow, r.safety.String(), colorReset)
 	fmt.Println("Usage:")
 	fmt.Println("  Type naturally   System translates to shell command")
 	fmt.Println("  Type command     Runs directly (syntax validated)")
@@ -134,6 +141,7 @@ func (r *REPL) showHelp() {
 	fmt.Println("  .help            Show this help")
 	fmt.Println("  .api             Change API key and model")
 	fmt.Println("  .model           Change model only")
+	fmt.Println("  .safety          Change safety level (Instant, Lax, Cautious, Strict)")
 	fmt.Println("  .uninstall       Remove nlcli")
 	fmt.Println("  .exit            Exit nlcli")
 	fmt.Println()
@@ -178,7 +186,7 @@ func (r *REPL) changeAPI() {
 		model = models[0]
 	}
 
-	if err := config.SaveConfig(key, model); err != nil {
+	if err := config.SaveConfig(key, model, int(r.safety)); err != nil {
 		fmt.Printf("%sError saving config: %s%s\n", colorRed, err, colorReset)
 		return
 	}
@@ -209,7 +217,7 @@ func (r *REPL) changeModel() {
 		return
 	}
 
-	if err := config.SaveConfig(key, model); err != nil {
+	if err := config.SaveConfig(key, model, int(r.safety)); err != nil {
 		fmt.Printf("%sError saving config: %s%s\n", colorRed, err, colorReset)
 		return
 	}
@@ -226,11 +234,13 @@ func (r *REPL) uninstall() {
 		return
 	}
 
+	config.RemoveFromPath()
+
 	home, _ := os.UserHomeDir()
 	configDir := filepath.Join(home, ".nlcli")
 	os.RemoveAll(configDir)
 	fmt.Println("Removed ~/.nlcli")
-	fmt.Println("To complete uninstall, remove the nlcli binary from your PATH.")
+	fmt.Println("Success: nlcli has been removed from your PATH and system.")
 	os.Exit(0)
 }
 
@@ -264,11 +274,71 @@ func (r *REPL) translateAndRun(input string) {
 	}
 
 	cmd = strings.TrimSpace(cmd)
+
+	// Strip markdown blocks if present
+	if strings.HasPrefix(cmd, "```") {
+		lines := strings.Split(cmd, "\n")
+		if len(lines) > 2 {
+			cmd = strings.Join(lines[1:len(lines)-1], "\n")
+		}
+	}
+	cmd = strings.Trim(cmd, "`")
+	cmd = strings.TrimSpace(cmd)
+
+	// Strip common labels some models add
+	prefixes := []string{"powershell", "pwsh", "bash", "zsh", "fish", "cmd"}
+	lowerCmd := strings.ToLower(cmd)
+	for _, p := range prefixes {
+		if strings.HasPrefix(lowerCmd, p+" ") {
+			cmd = cmd[len(p)+1:]
+			break
+		}
+	}
+	cmd = strings.TrimSpace(cmd)
+
 	if cmd == "" {
 		fmt.Printf("%sError: Could not translate to a command.%s\n", colorRed, colorReset)
 		return
 	}
 
 	fmt.Printf("  %s%s%s\n", colorYellow, cmd, colorReset)
+
+	if shell.IsDangerous(cmd, r.safety) {
+		fmt.Printf("%sExecute this command? [Enter to run / Ctrl+C to cancel]%s ", colorCyan, colorReset)
+		_, err := r.reader.ReadString('\n')
+		if err != nil {
+			fmt.Println()
+			return
+		}
+	}
+
 	r.runCommand(cmd)
+}
+
+func (r *REPL) changeSafety() {
+	options := []string{
+		"Instant  (No confirmation for any command)",
+		"Lax      (Confirm only for very destructive commands)",
+		"Cautious (Confirm for any command that modifies files/system)",
+		"Strict   (Confirm for every translated command)",
+	}
+
+	selected, err := config.SelectGeneric(options, "Safety Levels")
+	if err != nil {
+		return
+	}
+
+	switch {
+	case strings.HasPrefix(selected, "Instant"):
+		r.safety = shell.SafetyInstant
+	case strings.HasPrefix(selected, "Lax"):
+		r.safety = shell.SafetyLax
+	case strings.HasPrefix(selected, "Cautious"):
+		r.safety = shell.SafetyCautious
+	case strings.HasPrefix(selected, "Strict"):
+		r.safety = shell.SafetyStrict
+	}
+
+	config.SaveSafetyLevel(int(r.safety))
+	fmt.Printf("Safety level set to: %s%s%s\n", colorYellow, r.safety.String(), colorReset)
 }

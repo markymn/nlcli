@@ -40,7 +40,7 @@ func (c *Anthropic) GetCommand(userInput, cwd string, shellType shell.ShellType,
 		"messages": []map[string]string{
 			{"role": "user", "content": prompt},
 		},
-		"max_tokens": 100,
+		"max_tokens": 300,
 	})
 
 	req, _ := http.NewRequest("POST", "https://api.anthropic.com/v1/messages", bytes.NewBuffer(reqBody))
@@ -91,6 +91,10 @@ func FetchAnthropicModels(apiKey string) ([]string, error) {
 		Data []struct {
 			ID string `json:"id"`
 		} `json:"data"`
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("api error: %s", resp.Status)
 	}
 
 	if err := json.Unmarshal(body, &result); err != nil {

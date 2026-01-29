@@ -41,7 +41,7 @@ func (c *OpenAI) GetCommand(userInput, cwd string, shellType shell.ShellType, hi
 		"messages": []map[string]string{
 			{"role": "user", "content": prompt},
 		},
-		"max_tokens": 100,
+		"max_tokens": 300,
 	})
 
 	req, _ := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(reqBody))
@@ -92,6 +92,10 @@ func FetchOpenAIModels(apiKey string) ([]string, error) {
 		Data []struct {
 			ID string `json:"id"`
 		} `json:"data"`
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("api error: %s", resp.Status)
 	}
 
 	if err := json.Unmarshal(body, &result); err != nil {

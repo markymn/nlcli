@@ -16,36 +16,41 @@ const (
 )
 
 func SelectModel(models []string, providerName string) (string, error) {
-	if len(models) == 0 {
-		return "", fmt.Errorf("no models available")
+	title := fmt.Sprintf("%s models", providerName)
+	return SelectGeneric(models, title)
+}
+
+func SelectGeneric(options []string, title string) (string, error) {
+	if len(options) == 0 {
+		return "", fmt.Errorf("no options available")
 	}
 
 	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 	if err != nil {
-		return models[0], nil
+		return options[0], nil
 	}
 	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
 	selected := 0
 	buf := make([]byte, 3)
 
-	fmt.Printf("\r\n%s models (use ↑↓ arrows, Enter to select):\r\n", providerName)
-	printOptions(models, selected)
+	fmt.Printf("\r\n%s (use ↑↓ arrows, Enter to select):\r\n", title)
+	printOptions(options, selected)
 
 	for {
 		n, err := os.Stdin.Read(buf)
 		if err != nil {
-			return models[selected], nil
+			return options[selected], nil
 		}
 
 		if n == 1 {
 			switch buf[0] {
 			case keyEnter, keyLF:
-				clearOptions(len(models) + 1)
-				return models[selected], nil
+				clearOptions(len(options) + 1)
+				return options[selected], nil
 			case 'q', 3:
-				clearOptions(len(models) + 1)
-				return models[0], nil
+				clearOptions(len(options) + 1)
+				return options[0], nil
 			}
 		} else if n == 3 && buf[0] == keyESC && buf[1] == '[' {
 			switch buf[2] {
@@ -54,22 +59,22 @@ func SelectModel(models []string, providerName string) (string, error) {
 					selected--
 				}
 			case keyDown:
-				if selected < len(models)-1 {
+				if selected < len(options)-1 {
 					selected++
 				}
 			}
-			clearOptions(len(models))
-			printOptions(models, selected)
+			clearOptions(len(options))
+			printOptions(options, selected)
 		}
 	}
 }
 
-func printOptions(models []string, selected int) {
-	for i, model := range models {
+func printOptions(options []string, selected int) {
+	for i, option := range options {
 		if i == selected {
-			fmt.Printf("\r  \033[36m▸ %s\033[0m\r\n", model)
+			fmt.Printf("\r  \033[36m▸ %s\033[0m\r\n", option)
 		} else {
-			fmt.Printf("\r    %s\r\n", model)
+			fmt.Printf("\r    %s\r\n", option)
 		}
 	}
 }

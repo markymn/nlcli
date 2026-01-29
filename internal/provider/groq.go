@@ -65,7 +65,7 @@ func (g *Groq) GetCommand(userInput, cwd string, shellType shell.ShellType, hist
 
 	reqBody := groqRequest{
 		Model:     g.model,
-		MaxTokens: 150,
+		MaxTokens: 300,
 		Messages: []groqMsg{
 			{Role: "user", Content: prompt},
 		},
@@ -115,6 +115,10 @@ func FetchGroqModels(apiKey string) ([]string, error) {
 		Data []struct {
 			ID string `json:"id"`
 		} `json:"data"`
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("api error: %s", resp.Status)
 	}
 
 	if err := json.Unmarshal(body, &result); err != nil {

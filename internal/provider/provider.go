@@ -28,12 +28,13 @@ User Request: %s
 
 Instructions:
 1. Output ONLY the raw shell command to execute. 
-2. Do NOT use markdown formatting (no backticks).
+2. Do NOT use markdown formatting (no backticks, no code blocks).
 3. Do NOT provide explanations or warnings.
-4. If a file size is specified (e.g., "10mb"), translate it to the appropriate shell constraint (e.g., in PowerShell use '-lt 10MB').
-5. Do NOT recurse through subdirectories (e.g., no '-Recurse' in PowerShell or '-R' in ls) unless the user explicitly asks for it (e.g., uses words like "recursively", "everywhere", "globally", "in all subfolders"). "All files" means all files in the CURRENT directory only.
-6. If the request is ambiguous, provide the most likely intended command.
-7. If you cannot find a valid command, output an empty string.`,
+4. If the user asks for a filter (e.g., "CPU > 2000" or "larger than 10mb"), use the appropriate shell piping and filtering syntax.
+   - PowerShell Example: Get-Process | Where-Object { $_.CPU -gt 2000 }
+   - Bash Example: ps aux | awk '$3 > 20'
+5. Do NOT recurse through subdirectories unless explicitly requested (words like "recursively", "everywhere", "globally").
+6. Output ONLY the complete, raw command. Do not truncate.`,
 		shell.GetShellName(shellType), runtime.GOOS, cwd, hist.Format(), userInput)
 }
 

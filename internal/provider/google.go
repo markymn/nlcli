@@ -43,6 +43,9 @@ func (g *Google) GetCommand(userInput, cwd string, shellType shell.ShellType, hi
 				},
 			},
 		},
+		"generationConfig": map[string]interface{}{
+			"maxOutputTokens": 300,
+		},
 	})
 
 	url := "https://generativelanguage.googleapis.com/v1beta/models/" + g.model + ":generateContent?key=" + g.apiKey
@@ -94,6 +97,10 @@ func FetchGoogleModels(apiKey string) ([]string, error) {
 		Models []struct {
 			Name string `json:"name"`
 		} `json:"models"`
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("api error: %s", resp.Status)
 	}
 
 	if err := json.Unmarshal(body, &result); err != nil {
